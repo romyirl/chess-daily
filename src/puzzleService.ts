@@ -1,12 +1,25 @@
+import { supabase } from './supabaseClient'
+
 export async function fetchDailyPuzzle() {
-  const response = await fetch('https://lichess.org/api/puzzle/daily')
-  const data = await response.json()
-  console.log('RAW DATA:', data)
+  const today = new Date().toISOString().split('T')[0]
   
+  const { data, error } = await supabase
+    .from('puzzles')
+    .select('*')
+    .eq('puzzle_date', today)
+    .single()
+
+  if (error) {
+    console.error('Error fetching puzzle:', error)
+    return null
+  }
+
   return {
-    fen: data.puzzle.fen,
-    solution: data.puzzle.solution,
-    rating: data.puzzle.rating,
-    id: data.puzzle.id
+    fen: data.fen,
+    solution: data.solution.split(','),
+    rating: data.rating,
+    themes: data.themes,
+    difficulty: data.difficulty,
+    id: data.id
   }
 }

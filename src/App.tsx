@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { Chess } from 'chess.js'
 import { fetchDailyPuzzle } from './puzzleService'
-import { supabase } from './supabaseClient'
+
 
 function App() {
   const [game, setGame] = useState(new Chess())
@@ -16,7 +16,12 @@ function App() {
     // async function goes w await function to load puzzle from lichess api 
     async function loadPuzzle() { 
       const puzzle = await fetchDailyPuzzle()
-      const newGame = new Chess(puzzle.fen)
+      if (!puzzle) {
+        console.error('No puzzle found for today')
+        setLoading(false)
+        return
+    }
+const newGame = new Chess(puzzle.fen)
       setGame(newGame)
       setPosition(puzzle.fen)
       setSolution(puzzle.solution)
@@ -24,7 +29,7 @@ function App() {
       const turn = parts[1]
       setWhoToMove(turn === 'w' ? 'White to move' : 'Black to move')
       setLoading(false)
-      console.log('Supabase connected:', supabase)
+      
     }
     loadPuzzle()
   }, [])
